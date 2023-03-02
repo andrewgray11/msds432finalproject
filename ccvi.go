@@ -20,21 +20,21 @@ const (
 )
 
 type CCVRow struct {
-	Index                int     `json:"index_"`
-	CommunityArea        string  `json:"community_area"`
-	OverallScore         float64 `json:"overall_score"`
-	SocioeconomicScore   float64 `json:"socioeconomic_score"`
-	HouseholdCrowding    float64 `json:"household_crowding"`
-	NoVehicleHouseholds  float64 `json:"no_vehicle_households"`
-	PerCapitaIncome      float64 `json:"per_capita_income"`
-	Unemployment         float64 `json:"unemployment"`
-	NoHighSchoolDiploma  float64 `json:"no_high_school_diploma"`
-	AgeAdjustedDeathRate float64 `json:"age_adjusted_death_rate"`
-	DiabetesPrevalence   float64 `json:"diabetes_prevalence"`
-	HIVPrevalenceRate    float64 `json:"hiv_prevalence_rate"`
-	InfantMortalityRate  float64 `json:"infant_mortality_rate"`
-	LeadPoisoningRate    float64 `json:"lead_poisoning_rate"`
-	HospitalizationRate  float64 `json:"hospitalization_rate"`
+	GeographyType        string  `json:"geography_type"`
+	CommunityAreaOrZip   int     `json:"community_area_or_zip"`
+	CommunityAreaName    string  `json:"community_area_name"`
+	CcviCategory         string  `json:"ccvi_category"`
+	CcviScore            float64 `json:"ccvi_score"`
+	SocioeconomicStatus  int     `json:"rank_socioeconomic_status"`
+	HouseholdComposition int     `json:"rank_household_composition"`
+	NoPrimaryCare        int     `json:"rank_adults_no_pcp"`
+	CumMobilityRatio     int     `json:"rank_cumulative_mobility_ratio"`
+	FrontlineWorkers     int     `json:"rank_frontline_essential_workers"`
+	Age65OrGreater       int     `json:"rank_age_65_plus"`
+	ComorbidConditions   int     `json:"rank_comorbid_conditions"`
+	CovidIncidenceRate   int     `json:"rank_covid_19_incidence_rate"`
+	CovidHospitalRate    int     `json:"rank_covid_19_hospital_admission_rate"`
+	CrudeMortalityRate   int     `json:"rank_covid_19_hospital_admission_rate"`
 }
 
 func main() {
@@ -66,18 +66,20 @@ func main() {
 	defer db.Close()
 
 	// Insert each row into the database
-	for _, row := range rows {
-		query := `INSERT INTO ccv_data (index_, community_area, overall_score, socioeconomic_score, household_crowding,
-                   no_vehicle_households, per_capita_income, unemployment, no_high_school_diploma,
-                   age_adjusted_death_rate, diabetes_prevalence, hiv_prevalence_rate, infant_mortality_rate,
-                   lead_poisoning_rate, hospitalization_rate)
-                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
-		_, err := db.Exec(query, row.Index, row.CommunityArea, row.OverallScore, row.SocioeconomicScore,
-			row.HouseholdCrowding, row.NoVehicleHouseholds, row.PerCapitaIncome, row.Unemployment,
-			row.NoHighSchoolDiploma, row.AgeAdjustedDeathRate, row.DiabetesPrevalence, row.HIVPrevalenceRate, row.InfantMortalityRate, row.LeadPoisoningRate, row.HospitalizationRate)
+	for _, row := range ccvRows {
+		query := `INSERT INTO ccv_data (geography_type, community_area_or_zip, community_area_name, ccvi_category, ccvi_score,
+					rank_socioeconomic_status, rank_household_composition, rank_adults_no_pcp, rank_cumulative_mobility_ratio,
+					rank_frontline_essential_workers, rank_age_65_plus, rank_comorbid_conditions, rank_covid_19_incidence_rate,
+					rank_covid_19_hospital_admission_rate, rank_covid_19_hospital_admission_rate)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
+		_, err := db.Exec(query, row.GeographyType, row.CommunityAreaOrZip, row.CommunityAreaName, row.CcviCategory,
+			row.CcviScore, row.SocioeconomicStatus, row.HouseholdComposition, row.NoPrimaryCare,
+			row.CumMobilityRatio, row.FrontlineWorkers, row.Age65OrGreater, row.ComorbidConditions,
+			row.CovidIncidenceRate, row.CovidHospitalRate, row.CrudeMortalityRate)
 		if err != nil {
 			panic(err)
 		}
 	}
 	fmt.Println("Data has been successfully inserted into the database.")
+
 }
