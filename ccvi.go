@@ -66,7 +66,7 @@ func main() {
 	defer db.Close()
 
 	// Insert each row into the database
-	for _, row := range ccvRows {
+	for _, row := range rows {
 		query := `INSERT INTO ccv_data (geography_type, community_area_or_zip, community_area_name, ccvi_category, ccvi_score,
 					rank_socioeconomic_status, rank_household_composition, rank_adults_no_pcp, rank_cumulative_mobility_ratio,
 					rank_frontline_essential_workers, rank_age_65_plus, rank_comorbid_conditions, rank_covid_19_incidence_rate,
