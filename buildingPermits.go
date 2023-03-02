@@ -14,17 +14,13 @@ type buildingPermit struct {
 	ID                  int    `json:"id"`
 	PermitNumber        string `json:"permit_"` // use backtick to handle column name with underscore
 	PermitType          string `json:"permit_type"`
-	PermitSubType       string `json:"permit_subtype"`
-	PermitDescription   string `json:"permit_description"`
-	PermitIssueDate     string `json:"issue_date"`
-	PermitEstimatedCost int    `json:"estimated_cost"`
-	PermitStatus        string `json:"status"`
-	PermitStreetNumber  int    `json:"street_number"`
-	PermitStreetName    string `json:"street_direction"`
-	PermitSuffix        string `json:"suffix"`
-	PermitWorkType      string `json:"work_type"`
-	PermitPIN1          int    `json:"pin1"`
-	PermitPIN2          int    `json:"pin2"`
+	ReviewType			string `json:"review_type"`
+	TotalFee			float64`json:"total_fee"`
+	AppStartDate		string `json:"application_start_date"`
+	IssueDate			string `json:"issue_date"`
+	CommunityArea		int	   `json:"community_area"`
+	Latitude			float64`json:"latitude"`
+	Longitude			float64`json:"longitude"`
 }
 
 func main() {
@@ -54,15 +50,13 @@ func main() {
 
 	// Insert each building permit into the database
 	for _, permit := range buildingPermits {
-		// Check if all columns are not blank
-		if permit.PermitNumber != "" && permit.PermitType != "" && permit.PermitSubType != "" && permit.PermitIssueDate != "" {
-			_, err = db.Exec("INSERT INTO building_permits (id, permit_number, permit_type, permit_subtype, permit_description, issue_date, estimated_cost, status, street_number, street_name, suffix, work_type, pin1, pin2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)", permit.ID, permit.PermitNumber, permit.PermitType, permit.PermitSubType, permit.PermitDescription, permit.PermitIssueDate, permit.PermitEstimatedCost, permit.PermitStatus, permit.PermitStreetNumber, permit.PermitStreetName, permit.PermitSuffix, permit.PermitWorkType, permit.PermitPIN1, permit.PermitPIN2)
-			if err != nil {
-				fmt.Println("Error inserting row into database:", err)
-				return
-			}
+		query := `INSERT INTO building_permits (id, permit_number, permit_type, review_type, total_fee, application_start_date, issue_date, community_area, latitude, longitude)
+				  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+	
+		_, err := db.Exec(query, permit.ID, permit.PermitNumber, permit.PermitType, permit.ReviewType, permit.TotalFee, permit.AppStartDate, permit.IssueDate, permit.CommunityArea, permit.Latitude, permit.Longitude)
+		if err != nil {
+			panic(err)
 		}
 	}
-
-	fmt.Println("Inserted", len(buildingPermits), "rows into database")
+	fmt.Println("Building permits data has been successfully inserted into the database.")
 }
