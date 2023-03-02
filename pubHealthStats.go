@@ -1,86 +1,89 @@
 package main
 
 import (
-    "database/sql"
-    "encoding/json"
-    "fmt"
-    "log"
-    "net/http"
-    "strconv"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 
-    _ "github.com/lib/pq"
+	_ "github.com/lib/pq"
+)
+
+const (
+	url    = "https://data.cityofchicago.org/resource/iqnk-2tcu.json?$limit=500"
+	dbHost = "localhost"
+	dbPort = 5432
+	dbUser = "postgres"
+	dbPass = "postgres"
+	dbName = "testdb"
 )
 
 type PublicHealthStats struct {
-    CommunityArea      string `json:"community_area"`
-    BirthRate          string `json:"birth_rate"`
-    GeneralFertility   string `json:"general_fertility_rate"`
-    LowBirthWeight     string `json:"low_birth_weight"`
-    PrenatalCare       string `json:"prenatal_care_beginning_in_first_trimester"`
-    TeenBirthRate      string `json:"teen_birth_rate"`
-    Uninsured          string `json:"uninsured"`
-    BelowPoverty       string `json:"below_poverty_level"`
-    CrowdedHousing     string `json:"crowded_housing"`
-    Dependency         string `json:"dependency"`
-    NoDiploma          string `json:"no_high_school_diploma"`
-    PerCapitaIncome    string `json:"per_capita_income"`
-    Unemployment       string `json:"unemployment"`
-    Assault            string `json:"assault"`
-    BreastCancer       string `json:"breast_cancer_in_females"`
-    Cancer             string `json:"cancer"`
-    ColorectalCancer   string `json:"colorectal_cancer"`
-    Diabetes           string `json:"diabetes_related"`
-    FirearmMortality   string `json:"firearm_related"`
-    InfantMortality    string `json:"infant_mortality_rate"`
-    LungCancer         string `json:"lung_cancer"`
-    ProstateCancer     string `json:"prostate_cancer_in_males"`
-    Stroke             string `json:"stroke_cerebrovascular_disease"`
-    Tuberculosis       string `json:"tuberculosis"`
-    BelowPovertyRecent string `json:"below_poverty_level_recent"`
-    NoDiplomaRecent    string `json:"no_high_school_diploma_recent"`
-    UnemploymentRecent string `json:"unemployment_recent"`
+	CommunityArea                         string  `json:"community_area"`
+	CommunityAreaName                     string  `json:"community_area_name"`
+	BirthRate                             string  `json:"birth_rate"`
+	GeneralFertilityRate                  string  `json:"general_fertility_rate"`
+	LowBirthWeight                        string  `json:"low_birth_weight"`
+	PrenatalCareBeginningInFirstTrimester float64 `json:"prenatal_care_beginning_in_first_trimester"`
+	PretermBirths                         string  `json:"preterm_births"`
+	TeenBirthRate                         float64 `json:"teen_birth_rate"`
+	AssaultHomicide                       string  `json:"assault_homicide"`
+	BreastCancerInFemales                 float64 `json:"breast_cancer_in_females"`
+	CancerAllSites                        string  `json:"cancer_all_sites"`
+	ColorectalCancer                      float64 `json:"colorectal_cancer"`
+	DiabetesRelated                       string  `json:"diabetes_related"`
+	FirearmRelated                        float64 `json:"firearm_related"`
+	InfantMortalityRate                   float64 `json:"infant_mortality_rate"`
+	LungCancer                            float64 `json:"lung_cancer"`
+	ProstateCancerInMales                 float64 `json:"prostate_cancer_in_males"`
+	StrokeCerebrovascularDisease          float64 `json:"stroke_cerebrovascular_disease"`
+	ChildhoodBloodLeadLevelScreening      float64 `json:"childhood_blood_lead_level_screening"`
+	ChildhoodLeadPoisoning                float64 `json:"childhood_lead_poisoning"`
+	GonorrheaInFemales                    float64 `json:"gonorrhea_in_females"`
+	GonorrheaInMales                      string  `json:"gonorrhea_in_males"`
+	Tuberculosis                          float64 `json:"tuberculosis"`
+	BelowPovertyLevel                     float64 `json:"below_poverty_level"`
+	CrowdedHousing                        float64 `json:"crowded_housing"`
+	Dependency                            float64 `json:"dependency"`
+	NoHighSchoolDiploma                   float64 `json:"no_high_school_diploma"`
+	PerCapitaIncome                       float64 `json:"per_capita_income"`
+	Unemployment                          float64 `json:"unemployment"`
 }
 
 func main() {
-    // Connect to the database
-    connStr := "postgres://username:password@localhost/database?sslmode=disable"
-    db, err := sql.Open("postgres", connStr)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
+	// Connect to the database
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		dbUser, dbPass, dbHost, dbPort, dbName)
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
-    // Set up the HTTP client and request
-    client := http.Client{}
-    req, err := http.NewRequest("GET", "https://data.cityofchicago.org/resource/iqnk-2tcu.json?$limit=500", nil)
-    if err != nil {
-        log.Fatal(err)
-    }
+	// Get data from API
+	response, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		panic(err)
+	}
 
-    // Add the app token to the request header
-    req.Header.Add("X-App-Token", "YOUR_APP_TOKEN_HERE")
+	var rows []PublicHealthStats
+	err = json.Unmarshal(body, &rows)
+	if err != nil {
+		panic(err)
+	}
 
-    // Send the request and parse the response
-    resp, err := client.Do(req)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer resp.Body.Close()
-
-    var stats []PublicHealthStats
-    err = json.NewDecoder(resp.Body).Decode(&stats)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    for _, record := range data {
-        // Check if all columns are not blank
-        if record.CommunityArea != "" && record.CancerCrudeRate != "" && record.InfantMortalityRate != "" && record.TeenBirthRate != "" && record.UnemploymentRate != "" && record.LowBirthWeight != "" && record.Smoker != "" {
-            // Insert record into the database
-            err = insertRecord(db, record)
-            if err != nil {
-                log.Printf("Error inserting record: %v", err)
-            }
-        }
-    }
-        
+	for _, row := range rows {
+		_, err := db.Exec("INSERT INTO public_health_stats (community_area, community_area_name, birth_rate, general_fertility_rate, low_birth_weight, prenatal_care_beginning_in_first_trimester, preterm_births, teen_birth_rate, assault_homicide, breast_cancer_in_females, cancer_all_sites, colorectal_cancer, diabetes_related, firearm_related, infant_mortality_rate, lung_cancer, prostate_cancer_in_males, stroke_cerebrovascular_disease, childhood_blood_lead_level_screening, childhood_lead_poisoning, gonorrhea_in_females, gonorrhea_in_males, tuberculosis, below_poverty_level, crowded_housing, dependency, no_high_school_diploma, per_capita_income, unemployment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)",
+			row.CommunityArea, row.CommunityAreaName, row.BirthRate, row.GeneralFertilityRate, row.LowBirthWeight, row.PrenatalCareBeginningInFirstTrimester, row.PretermBirths, row.TeenBirthRate, row.AssaultHomicide, row.BreastCancerInFemales, row.CancerAllSites, row.ColorectalCancer, row.DiabetesRelated, row.FirearmRelated, row.InfantMortalityRate, row.LungCancer, row.ProstateCancerInMales, row.StrokeCerebrovascularDisease, row.ChildhoodBloodLeadLevelScreening, row.ChildhoodLeadPoisoning, row.GonorrheaInFemales, row.GonorrheaInMales, row.Tuberculosis, row.BelowPovertyLevel, row.CrowdedHousing, row.Dependency, row.NoHighSchoolDiploma, row.PerCapitaIncome, row.Unemployment)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println("Public Health data has been successfully inserted into the database.")
+}
