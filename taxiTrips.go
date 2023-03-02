@@ -4,79 +4,84 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"time"
 
 	_ "github.com/lib/pq"
 )
 
+const (
+	url    = "https://data.cityofchicago.org/resource/wrvz-psew.json?$limit=500"
+	dbHost = "localhost"
+	dbPort = 5432
+	dbUser = "postgres"
+	dbPass = "postgres"
+	dbName = "testdb"
+)
+
 // Define a struct to hold the taxi trip data
-type TaxiTrip struct {
-	ID                   int
-	TripStartTimestamp   time.Time
-	TripEndTimestamp     time.Time
-	TripSeconds          int
-	TripMiles            float64
-	PickupCensusTract    string
-	DropoffCensusTract   string
-	PickupCommunityArea  string
-	DropoffCommunityArea string
-	Fare                 float64
-	Tips                 float64
-	Tolls                float64
-	Extras               float64
-	TripTotal            float64
-	PaymentType          string
-	Company              string
-	TaxiID               string
+type TaxiTrips struct {
+	TripID                   string  `json:"trip_id"`
+	TaxiID                   string  `json:"taxi_id"`
+	TripStartTimestamp       string  `json:"trip_start_timestamp"`
+	TripEndTimestamp         string  `json:"trip_end_timestamp"`
+	TripSeconds              int     `json:"trip_seconds"`
+	TripMiles                float64 `json:"trip_miles"`
+	PickupCensusTract        string  `json:"pickup_census_tract"`
+	DropoffCensusTract       string  `json:"dropoff_census_tract"`
+	PickupCommunityArea      int     `json:"pickup_community_area"`
+	DropoffCommunityArea     int     `json:"dropoff_community_area"`
+	Fare                     float64 `json:"fare"`
+	Tips                     float64 `json:"tips"`
+	Tolls                    float64 `json:"tolls"`
+	Extras                   float64 `json:"extras"`
+	TripTotal                float64 `json:"trip_total"`
+	PaymentType              string  `json:"payment_type"`
+	Company                  string  `json:"company"`
+	PickupCentroidLatitude   float64 `json:"pickup_centroid_latitude"`
+	PickupCentroidLongitude  float64 `json:"pickup_centroid_longitude"`
+	PickupCentroidLocation   string  `json:"pickup_centroid_location"`
+	DropoffCentroidLatitude  float64 `json:"dropoff_centroid_latitude"`
+	DropoffCentroidLongitude float64 `json:"dropoff_centroid_longitude"`
+	DropoffCentroidLocation  string  `json:"dropoff_centroid_location"`
 }
 
 func main() {
-	// Set up a database connection
-	db, err := sql.Open("postgres", "host=localhost dbname=my_database user=my_username password=my_password sslmode=disable")
+	// Connect to the database
+	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		dbUser, dbPass, dbHost, dbPort, dbName)
+	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		fmt.Println("Error connecting to database:", err)
-		return
+		panic(err)
 	}
 	defer db.Close()
 
-	// Set up an HTTP client to make API requests
-	client := http.Client{
-		Timeout: time.Second * 10,
+	// Get data from API
+	response, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		panic(err)
 	}
 
-	// Make an API request to retrieve the taxi trip data
-	resp, err := client.Get("https://data.cityofchicago.org/resource/wrvz-psew.json?$limit=500")
+	var rows []TaxiTrips
+	err = json.Unmarshal(body, &rows)
 	if err != nil {
-		fmt.Println("Error making API request:", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Decode the JSON response into a slice of TaxiTrip structs
-	var taxiTrips []TaxiTrip
-	err = json.NewDecoder(resp.Body).Decode(&taxiTrips)
-	if err != nil {
-		fmt.Println("Error decoding JSON response:", err)
-		return
+		panic(err)
 	}
 
 	// Iterate over the TaxiTrip slice and insert each row into the database
-	for _, trip := range taxiTrips {
-		if trip.TripStartTimestamp.IsZero() || trip.TripEndTimestamp.IsZero() ||
-			trip.TripSeconds == 0 || trip.TripMiles == 0 || trip.PickupCommunityArea == "" ||
-			trip.DropoffCommunityArea == "" || trip.Fare == 0 || trip.TripTotal == 0 {
-			continue // Skip rows with blank columns
-		}
-
-		_, err := db.Exec("INSERT INTO taxi_trips (trip_start_timestamp, trip_end_timestamp, trip_seconds, trip_miles, pickup_census_tract, dropoff_census_tract, pickup_community_area, dropoff_community_area, fare, tips, tolls, extras, trip_total, payment_type, company, taxi_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
-			trip.TripStartTimestamp, trip.TripEndTimestamp, trip.TripSeconds, trip.TripMiles, trip.PickupCensusTract, trip.DropoffCensusTract, trip.PickupCommunityArea, trip.DropoffCommunityArea, trip.Fare, trip.Tips, trip.Tolls, trip.Extras, trip.TripTotal, trip.PaymentType, trip.Company, trip.TaxiID)
-
-		// Handle any errors that occurred during the INSERT statement
+	for _, row := range rows {
+		_, err := db.Exec(
+			"INSERT INTO taxi_trips (trip_id, taxi_id, trip_start_timestamp, trip_end_timestamp, trip_seconds, trip_miles, pickup_census_tract, dropoff_census_tract, pickup_community_area, dropoff_community_area, fare, tips, tolls, extras, trip_total, payment_type, company, pickup_centroid_latitude, pickup_centroid_longitude, pickup_centroid_location, dropoff_centroid_latitude, dropoff_centroid_longitude, dropoff_centroid_location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)",
+			row.TripID, row.TaxiID, row.TripStartTimestamp, row.TripEndTimestamp, row.TripSeconds, row.TripMiles, row.PickupCensusTract, row.DropoffCensusTract, row.PickupCommunityArea, row.DropoffCommunityArea, row.Fare, row.Tips, row.Tolls, row.Extras, row.TripTotal, row.PaymentType, row.Company, row.PickupCentroidLatitude, row.PickupCentroidLongitude, row.PickupCentroidLocation, row.DropoffCentroidLatitude, row.DropoffCentroidLongitude, row.DropoffCentroidLocation,
+		)
 		if err != nil {
-			fmt.Println("Error inserting row into database:", err)
-			return
+			panic(err)
 		}
 	}
-	fmt.Println("Inserted", len(taxiTrips), "rows into database")
+	fmt.Println("Inserted", len(rows), "rows into database")
 }
