@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	_ "github.com/lib/pq"
@@ -22,7 +22,7 @@ const (
 type SocioeconomicData struct {
 	CommunityAreaNumber                   int     `json:"community_area_number"`
 	CommunityAreaName                     string  `json:"community_area_name"`
-	PercentOfHousingCrowded		      float64 `json:"percent_of_housing_crowded"`
+	PercentOfHousingCrowded               float64 `json:"percent_of_housing_crowded"`
 	PercentHouseholdsBelowPoverty         float64 `json:"percent_households_below_poverty"`
 	PercentAged16Unemployed               float64 `json:"percent_aged_16_unemployed"`
 	PercentAged25WithoutHighSchoolDiploma float64 `json:"percent_aged_25_without_high_school_diploma"`
@@ -38,7 +38,7 @@ func main() {
 		panic(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		panic(err)
 	}
