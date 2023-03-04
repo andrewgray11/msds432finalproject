@@ -14,8 +14,8 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 type buildingPermit struct {
@@ -59,7 +59,7 @@ func main() {
 
 	// Insert each building permit into the database
 	for _, permit := range buildingPermits {
-		query := `INSERT INTO building_permits (id, permit_number, permit_type, review_type, total_fee, application_start_date, issue_date, community_area, latitude, longitude)
+		query := `INSERT INTO buildingPermit (ID, PermitNumber, PermitType, ReviewType, TotalFee, AppStartDate, IssueDate, CommunityArea, Latitude, Longitude)
 				  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
 		_, err := db.Exec(query, permit.ID, permit.PermitNumber, permit.PermitType, permit.ReviewType, permit.TotalFee, permit.AppStartDate, permit.IssueDate, permit.CommunityArea, permit.Latitude, permit.Longitude)
