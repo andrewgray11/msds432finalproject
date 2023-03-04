@@ -15,8 +15,8 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 type TNPTrips struct {
@@ -71,11 +71,28 @@ func main() {
 	}
 	for _, row := range rows {
 		_, err := db.Exec(`
-			INSERT INTO tnptrips (trip_id, trip_start_timestamp, trip_end_timestamp, trip_seconds, trip_miles,
-			pickup_census_tract, dropoff_census_tract, pickup_community_area, dropoff_community_area, fare,
-			tip, additional_charges, trip_total, shared_trip_authorized, trips_pooled, pickup_centroid_latitude,
-			pickup_centroid_longitude, pickup_centroid_location, dropoff_centroid_latitude, dropoff_centroid_longitude,
-			dropoff_centroid_location)
+			INSERT INTO transNetProviderTrips (
+			TripID, 
+			TripStartTimestamp, 
+			TripEndTimestamp, 
+			TripSeconds, 
+			TripMiles, 
+			PickupCensusTract, 
+			DropoffCensusTract, 
+			PickupCommunityArea, 
+			DropoffCommunityArea, 
+			Fare, 
+			Tip, 
+			AdditionalCharges, 
+			TripTotal, 
+			SharedTripAuthorized, 
+			TripsPooled, 
+			PickupCentroidLatitude, 
+			PickupCentroidLongitude, 
+			PickupCentroidLocation, 
+			DropoffCentroidLatitude, 
+			DropoffCentroidLongitude, 
+			DropoffCentroidLocation)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
 			row.TripID, row.TripStartTimestamp, row.TripEndTimestamp, row.TripSeconds, row.TripMiles,
 			row.PickupCensusTract, row.DropoffCensusTract, row.PickupCommunityArea, row.DropoffCommunityArea, row.Fare,
