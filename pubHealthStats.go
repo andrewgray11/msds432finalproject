@@ -15,8 +15,8 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 type PublicHealthStats struct {
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	for _, row := range rows {
-		_, err := db.Exec("INSERT INTO public_health_stats (community_area, community_area_name, birth_rate, general_fertility_rate, low_birth_weight, prenatal_care_beginning_in_first_trimester, preterm_births, teen_birth_rate, assault_homicide, breast_cancer_in_females, cancer_all_sites, colorectal_cancer, diabetes_related, firearm_related, infant_mortality_rate, lung_cancer, prostate_cancer_in_males, stroke_cerebrovascular_disease, childhood_blood_lead_level_screening, childhood_lead_poisoning, gonorrhea_in_females, gonorrhea_in_males, tuberculosis, below_poverty_level, crowded_housing, dependency, no_high_school_diploma, per_capita_income, unemployment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)",
+		_, err := db.Exec("INSERT INTO pubHealthStats (CommunityArea, CommunityAreaName, BirthRate, GeneralFertilityRate, LowBirthWeight, PrenatalCareBeginningInFirstTrimester, PretermBirths, TeenBirthRate, AssaultHomicide, BreastCancerInFemales, CancerAllSites, ColorectalCancer, DiabetesRelated, FirearmRelated, InfantMortalityRate, LungCancer, ProstateCancerInMales, StrokeCerebrovascularDisease, ChildhoodBloodLeadLevelScreening, ChildhoodLeadPoisoning, GonorrheaInFemales, GonorrheaInMales, Tuberculosis, BelowPovertyLevel, CrowdedHousing, Dependency, NoHighSchoolDiploma, PerCapitaIncome, Unemployment) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)",
 			row.CommunityArea, row.CommunityAreaName, row.BirthRate, row.GeneralFertilityRate, row.LowBirthWeight, row.PrenatalCareBeginningInFirstTrimester, row.PretermBirths, row.TeenBirthRate, row.AssaultHomicide, row.BreastCancerInFemales, row.CancerAllSites, row.ColorectalCancer, row.DiabetesRelated, row.FirearmRelated, row.InfantMortalityRate, row.LungCancer, row.ProstateCancerInMales, row.StrokeCerebrovascularDisease, row.ChildhoodBloodLeadLevelScreening, row.ChildhoodLeadPoisoning, row.GonorrheaInFemales, row.GonorrheaInMales, row.Tuberculosis, row.BelowPovertyLevel, row.CrowdedHousing, row.Dependency, row.NoHighSchoolDiploma, row.PerCapitaIncome, row.Unemployment)
 		if err != nil {
 			panic(err)
