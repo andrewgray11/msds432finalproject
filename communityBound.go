@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// Connect to the Postgres database
-	db, err := sql.Open("postgres", "user=your_user password=your_password dbname=your_database sslmode=require")
+	db, err := sql.Open("postgres", "user=postgres password=root dbname=master sslmode=require")
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func main() {
 		}
 
 		// Insert the row into the Postgres database
-		_, err := db.Exec("INSERT INTO community_areas (area_number, area_name, geometry) VALUES ($1, $2, ST_GeomFromText($3, 4326))",
+		_, err := db.Exec("INSERT INTO communityBound (AreaNumber, AreaName, Geometry) VALUES ($1, $2, ST_GeomFromText($3, 4326))",
 			feature.Property[0].Value, feature.Property[1].Value, feature.Geometry)
 		if err != nil {
 			panic(err)
