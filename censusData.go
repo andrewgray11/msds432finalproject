@@ -15,8 +15,8 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 type SocioeconomicData struct {
@@ -61,9 +61,9 @@ func main() {
 
 	// Insert each row into the database
 	for _, d := range data {
-		query := `INSERT INTO socioeconomic_data (community_area_number, community_area_name, percent_of_housing_crowded, percent_households_below_poverty,
-			percent_aged_16_unemployed, percent_aged_25_without_high_school_diploma, percent_aged_under_18_or_over_64,
-			per_capita_income, hardship_index)
+		query := `INSERT INTO censusData (CommunityAreaNumber, CommunityAreaName, PercentOfHousingCrowded, PercentHouseholdsBelowPoverty,
+			PercentAged16Unemployed, PercentAged25WithoutHighSchoolDiploma, PercentAgedUnder18OrOver64,
+			PerCapitaIncome, HardshipIndex)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 		_, err := db.Exec(query, d.CommunityAreaNumber, d.CommunityAreaName, d.PercentOfHousingCrowded, d.PercentHouseholdsBelowPoverty,
 			d.PercentAged16Unemployed, d.PercentAged25WithoutHighSchoolDiploma, d.PercentAgedUnder18OrOver64,
