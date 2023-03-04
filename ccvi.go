@@ -15,8 +15,8 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 type CCVRow struct {
@@ -67,10 +67,10 @@ func main() {
 
 	// Insert each row into the database
 	for _, row := range rows {
-		query := `INSERT INTO ccv_data (geography_type, community_area_or_zip, community_area_name, ccvi_category, ccvi_score,
-					rank_socioeconomic_status, rank_household_composition, rank_adults_no_pcp, rank_cumulative_mobility_ratio,
-					rank_frontline_essential_workers, rank_age_65_plus, rank_comorbid_conditions, rank_covid_19_incidence_rate,
-					rank_covid_19_hospital_admission_rate, rank_covid_19_hospital_admission_rate)
+		query := `INSERT INTO ccvi (GeographyType, CommunityAreaOrZip, CommunityAreaName, CcviCategory, CcviScore,
+					SocioeconomicStatus, HouseholdComposition, NoPrimaryCare, CumMobilityRatio,
+					FrontlineWorkers, Age65OrGreater, ComorbidConditions, CovidIncidenceRate,
+					CovidHospitalRate, CrudeMortalityRate)
 					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
 		_, err := db.Exec(query, row.GeographyType, row.CommunityAreaOrZip, row.CommunityAreaName, row.CcviCategory,
 			row.CcviScore, row.SocioeconomicStatus, row.HouseholdComposition, row.NoPrimaryCare,
