@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
+	"github.com/relvacode/iso8601"
 	_ "github.com/lib/pq"
 )
 
@@ -15,16 +15,16 @@ const (
 	dbHost = "localhost"
 	dbPort = 5432
 	dbUser = "postgres"
-	dbPass = "postgres"
-	dbName = "testdb"
+	dbPass = "root"
+	dbName = "master"
 )
 
 // Define a struct to hold the taxi trip data
 type TaxiTrips struct {
 	TripID                   string  `json:"trip_id"`
 	TaxiID                   string  `json:"taxi_id"`
-	TripStartTimestamp       string  `json:"trip_start_timestamp"`
-	TripEndTimestamp         string  `json:"trip_end_timestamp"`
+	TripStartTimestamp       time.Time  `json:"trip_start_timestamp"`
+	TripEndTimestamp         time.Time  `json:"trip_end_timestamp"`
 	TripSeconds              int     `json:"trip_seconds"`
 	TripMiles                float64 `json:"trip_miles"`
 	PickupCensusTract        string  `json:"pickup_census_tract"`
@@ -76,7 +76,7 @@ func main() {
 	// Iterate over the TaxiTrip slice and insert each row into the database
 	for _, row := range rows {
 		_, err := db.Exec(
-			"INSERT INTO taxi_trips (trip_id, taxi_id, trip_start_timestamp, trip_end_timestamp, trip_seconds, trip_miles, pickup_census_tract, dropoff_census_tract, pickup_community_area, dropoff_community_area, fare, tips, tolls, extras, trip_total, payment_type, company, pickup_centroid_latitude, pickup_centroid_longitude, pickup_centroid_location, dropoff_centroid_latitude, dropoff_centroid_longitude, dropoff_centroid_location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)",
+			"INSERT INTO taxiTrips (TripID, TaxiID, TripStartTimestamp, TripEndTimestamp, TripSeconds, TripMiles, PickupCensusTract, DropoffCensusTract, PickupCommunityArea, DropoffCommunityArea, Fare, Tips, Tolls, Extras, TripTotal, PaymentType, Company, PickupCentroidLatitude, PickupCentroidLongitude, PickupCentroidLocation, DropoffCentroidLatitude, DropoffCentroidLongitude, DropoffCentroidLocation) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)",
 			row.TripID, row.TaxiID, row.TripStartTimestamp, row.TripEndTimestamp, row.TripSeconds, row.TripMiles, row.PickupCensusTract, row.DropoffCensusTract, row.PickupCommunityArea, row.DropoffCommunityArea, row.Fare, row.Tips, row.Tolls, row.Extras, row.TripTotal, row.PaymentType, row.Company, row.PickupCentroidLatitude, row.PickupCentroidLongitude, row.PickupCentroidLocation, row.DropoffCentroidLatitude, row.DropoffCentroidLongitude, row.DropoffCentroidLocation,
 		)
 		if err != nil {
