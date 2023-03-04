@@ -1,7 +1,7 @@
 # msds432finalproject
 Files and readme for Chicago BI Data ingestion and presentation. 
 
-Requirement 1: (10 Points) Create a Readme file that has a list of every program/microservice that you implemented. 
+** Requirement 1: (10 Points) Create a Readme file that has a list of every program/microservice that you implemented. 
 
 ProgreSQL database:  Create ProgreSQL datalake to store the data from Chicago public API
 
@@ -33,7 +33,7 @@ Tableau for frontend data visualization
 
 
 
-Requirement 2: (10 Points) Document in the Readme file the steps that are needed to install and run your project deliverables. 
+** Requirement 2: (10 Points) Document in the Readme file the steps that are needed to install and run your project deliverables. 
 
 1. Using the build functions to collect data from Chicago public API
 2. Store data into ProgreSQL  data lake
